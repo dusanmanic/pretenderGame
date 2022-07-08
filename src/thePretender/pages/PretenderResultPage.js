@@ -17,13 +17,17 @@ const PretenderResultPage = () => {
     useEffect(() => {
         let usersArray = []
         onValue(ref(database, `pretenderGame/gameInfo/`), snapshot => {
+            if(snapshot.val().endGame) window.location.href='https://ubiquitous-alpaca-9d3e24.netlify.app/'
+            // if(snapshot.val().endGame) window.location.href='http://localhost:3000/'
+
             setGameInfo(snapshot.val())
             if(snapshot.val().newRound) applicationDispatch({ type: 'set-pretenderPage', payload: 'pretenderGameLoading' })
 
             Object.entries(snapshot.val().players).map( x => {
                 usersArray.push(x[1])
                 if(x[1].id === pretenderUser.id) applicationDispatch({ type: 'set-pretender-user', payload: x[1] })
-            })
+            })          
+
             usersArray.sort(({votes:a}, {votes:b}) => b-a) //sort array of objects by value in object 
             setConnectedUsers(usersArray)
             usersArray = [] // mora se isprazni, ne secam se vise zbog cega
@@ -34,7 +38,7 @@ const PretenderResultPage = () => {
         <Container>
             <React.Fragment>
                 <Text fontSize='36px' fontWeight='bold'>The Pretender</Text>
-                <Text fontSize='22px'>Round 1 - Discusion</Text>
+                <Text fontSize='22px'>Round {gameInfo?.roundsPlayed} - Discusion</Text>
             </React.Fragment>
             <TopicName>
                 <Text fontSize='22px' color="white">{gameInfo?.topic}</Text>

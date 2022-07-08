@@ -16,6 +16,7 @@ const GameCard = ({ title, description, image }) => {
         applicationDispatch({ type: 'set-selected-game', payload: title})
         applicationDispatch({ type: 'set-page', payload: 'gameSetup'})
         set(ref(database, `pretenderGame/gameInfo/newRound/`), false)
+        set(ref(database, `pretenderGame/gameInfo/endRound/`), false)
 
     }
 

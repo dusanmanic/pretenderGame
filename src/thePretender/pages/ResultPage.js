@@ -45,10 +45,12 @@ const ResultPage = () => {
             durationOfRound: 30,
             durationOfPresentation: 30,
             gameCode: '',
-            roundsPlayed: 0,
+            roundsPlayed: 1,
             started: false,
             topic: '',
-            usersConnected: 0
+            usersConnected: 0,
+            newRound: false,
+            endGame: true,
         })
 
         applicationDispatch({ type: 'reset-defaults', payload: {
@@ -75,39 +77,56 @@ const ResultPage = () => {
             },
         }})
 
-        window.location.href='http://localhost:3000/admin-setup-page'
+        // window.location.href='http://localhost:3000/admin-setup-page'
+        window.location.href='https://ubiquitous-alpaca-9d3e24.netlify.app/admin-setup-page'
     }
 
     const newRoundHandler = event => {
         event.preventDefault()
+        let wasPretender = []
 
         setPopUp(true)
 
-        set(ref(database, `pretenderGame/gameInfo/`), {
-            ...gameInfo,
-            allPresented: false,
-            allVoted: false,
-            durationOfRound: 30,
-            durationOfPresentation: 30,
-            roundsPlayed: gameInfo.roundsPlayed + 1,
-            started: false,
-            topic: '',
-            newRound: true,
+        get(child(ref(database), `pretenderGame/gameInfo/players/`)).then((snapshot) => {
+            Object.entries(snapshot.val()).map(user => {
+                if(!user[1].pretender) wasPretender.push(user[1])
+            })
+            if(wasPretender.length === 0) {
+                setPopUp(false)
+                window.alert('All users was pretenders!')
+            } else {
+                set(ref(database, `pretenderGame/gameInfo/`), {
+                    ...gameInfo,
+                    allPresented: false,
+                    allVoted: false,
+                    durationOfRound: 30,
+                    durationOfPresentation: 30,
+                    roundsPlayed: gameInfo.roundsPlayed + 1,
+                    started: false,
+                    topic: '',
+                    newRound: true,
+                    endGame: false
+                })
+
+                get(child(ref(database), `pretenderGame/gameInfo/players/`)).then((snapshot) => {
+                    Object.entries(snapshot.val()).map( user => {
+                        set(ref(database, `pretenderGame/gameInfo/players/${user[1].playerURL}/`), {
+                            ...user[1],
+                            addedWord: false,
+                            finishPresenting: false,
+                            inputText: '',
+                            voted: false,
+                            isPretender: false
+                        })
+                    })
+                })
+                setTimeout(() => { applicationDispatch({ type: 'set-page', payload: 'gameSelection' }) }, 10000)
+            }
         })
 
-        get(child(ref(database), `pretenderGame/gameInfo/players/`)).then((snapshot) => {
-            Object.entries(snapshot.val()).map( user => {
-                set(ref(database, `pretenderGame/gameInfo/players/${user[1].playerURL}/`), {
-                    ...user[1],
-                    addedWord: false,
-                    finishPresenting: false,
-                    inputText: '',
-                    voted: false,
-                    pretender: false,
-                })
-            })
-        })
-        setTimeout(() => { applicationDispatch({ type: 'set-page', payload: 'gameSelection' }) }, 10000)
+        
+        
+
     }
 
     return (
@@ -120,7 +139,7 @@ const ResultPage = () => {
             <TopElement>
                 <TextWrapper>
                     <Text fontSize='36px' fontWeight='bold'>The Pretender</Text>
-                    <Text fontSize='22px'>Round 1 - Discusion</Text>
+                    <Text fontSize='22px'>Round {gameInfo?.roundsPlayed} - Discusion</Text>
                 </TextWrapper>
                 <ButtonWrapper>
                     <Button margin='0 25px 0 0' color='red' label='END GAME' onClick={endGameHandler} />
@@ -136,7 +155,8 @@ const ResultPage = () => {
                         {connectedUser.map( user => { return (
                             <PlayersTableTD key={uuidv4()}>
                                 <Text fontSize='22px'>{user.name}</Text>
-                                {user.voted && <Text fontSize='22px'>VOTED</Text>}
+                                {user.isPretender && <Text fontSize='22px'>pretender</Text>}
+                                {user.voted && <Text fontSize='22px'>VOTED</Text>}                                
                             </PlayersTableTD>
                         ) })}
                     </PlayersTableTR>

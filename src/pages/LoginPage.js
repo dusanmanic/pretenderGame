@@ -16,7 +16,7 @@ const LoginPage = () => {
             applicationDispatch({ type: 'set-logged', payload: true })
             applicationDispatch({ type: 'set-page', payload: 'gameSelection' })
         } else {
-            alert('Zajebao si password, proveri ga!')
+            alert('Wrong password, please try again!')
         }
 
     }

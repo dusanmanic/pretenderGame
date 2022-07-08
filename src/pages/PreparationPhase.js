@@ -34,13 +34,17 @@ const PreparationPhase = () => {
                         }, 5000)
                     }
                 })
-                setConnectedUsers(usersArray)
-                setNumberOfConnectedUser(Object.entries(snapshot.val()).length)
-               
+                setConnectedUsers(usersArray)               
                 // mora se isprazni, ne secam se vise zbog cega
                 usersArray = [] 
                 usersFinishPresenting = []
             }
+        })
+    }, [])
+
+    useEffect(() => {
+        get(child(ref(database), `pretenderGame/gameInfo/`)).then(snapshot => {
+            setNumberOfConnectedUser(Object.entries(snapshot.val().players).length)
         })
     }, [])
 
@@ -102,7 +106,8 @@ const PreparationPhase = () => {
                         {connectedUsers.map( user => { return (
                             <PlayersTableTD key={uuidv4()}>
                                 <Text display='block' fontSize='22px'>{user.name}</Text>
-                                {user.pretender && <Text display='block' fontSize='30px'>PRETENDER</Text>}
+                                {user.isPretender && <Text display='block' fontSize='30px'>pretender</Text>}
+                                {(user.pretender && !user.isPretender) &&<Text display='block' fontSize='30px'>was pretender</Text>}
                             </PlayersTableTD>
                         ) })}
                     </PlayersTableTR>

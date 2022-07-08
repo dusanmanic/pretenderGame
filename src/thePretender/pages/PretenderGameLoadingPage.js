@@ -25,7 +25,7 @@ const PretenderGameLoadingPage = () => {
                             countdownNumber-- 
                             if(countdownNumber === 0) {
                                 clearInterval(countdown)
-                                data.pretender ? 
+                                data.isPretender ? 
                                     applicationDispatch({ type: 'set-pretenderPage', payload: 'pretenderUserPage' })
                                 :
                                     applicationDispatch({ type: 'set-pretenderPage', payload: 'pretenderGamePreparationPhase' })

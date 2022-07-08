@@ -118,7 +118,7 @@ const PretenderPreparationPhase = () => {
                 <SectionWrapper>
                     <React.Fragment>
                         <Text fontSize='36px' fontWeight='bold'>The Pretender</Text>
-                        <Text fontSize='22px'>Round 1</Text>
+                        <Text fontSize='22px'>Round {gameInfo?.roundsPlayed}</Text>
                     </React.Fragment>
                     <TimerSection>
                         {!pretenderUser.addedWord ?

@@ -23,13 +23,20 @@ const GameSetupPage = () => {
                 Object.entries(snapshot.val()).map( x => {
                     usersArray.push(x[1].name)    
                 })
-                setConnectedUsers(usersArray)
-                setNumberOfConnectedUser(Object.entries(snapshot.val()).length)
+                setConnectedUsers(usersArray)                
                 usersArray = [] // mora se isprazni, ne secam se vise zbog cega
+            } 
+        })    
+    }, [])
+    
+    useEffect(() => {
+        get(child(ref(database), `pretenderGame/gameInfo/players/`)).then(snapshot => {
+            if(snapshot.exists()) {
+                setNumberOfConnectedUser(Object.entries(snapshot.val()).length)
             } else {
                 setNumberOfConnectedUser(0)
             }
-        })    
+        }) 
     }, [])
 
     const selectOnChangeHandler = event => {
@@ -45,8 +52,8 @@ const GameSetupPage = () => {
     }
 
     const copySessionLink = () => {
-        navigator.clipboard.writeText(`localhost:3000/${gameCode}`)
-        // navigator.clipboard.writeText(`https://ubiquitous-alpaca-9d3e24.netlify.app/${gameCode}`)
+        // navigator.clipboard.writeText(`localhost:3000/${gameCode}`)
+        navigator.clipboard.writeText(`https://ubiquitous-alpaca-9d3e24.netlify.app/${gameCode}`)
     }
 
     const selectRoundDuration = event => {
@@ -59,26 +66,72 @@ const GameSetupPage = () => {
         set(ref(database, `pretenderGame/gameInfo/durationOfPresentation`), event.value)
     }
 
+    const databaseReset = event => {
+        event.preventDefault()
+
+        set(ref(database, `pretenderGame/gameInfo/`), {
+            admin: 'test',
+            allPresented: false,
+            allVoted: false,
+            durationOfRound: 30,
+            durationOfPresentation: 30,
+            gameCode: '',
+            roundsPlayed: 1,
+            started: false,
+            topic: '',
+            usersConnected: 0,
+            newRound: false,
+            endGame: false,
+        })
+
+        applicationDispatch({ type: 'reset-defaults', payload: {
+            masterData: false,
+            userData: false,
+            logged: false,
+            page: 'login',
+            pretenderPage: 'pretenderGameSetup',
+            pretenderUser: null,
+            selectedGame: '',
+            selectedTopic: '',
+            selectedWord: '',
+            gameDuration: '',
+            presentationDuration: '',
+            game: {
+                name: '',
+                topic: []
+            },
+            gameCode: null,
+            topic: {},
+            editTopic: { 
+                name: '',
+                topic: []
+            },
+        }})
+
+        // window.location.href='http://localhost:3000/admin-setup-page'
+        window.location.href='https://ubiquitous-alpaca-9d3e24.netlify.app/admin-setup-page'
+        
+    }
+
     const startGame = () => {
         let usersArray = []
 
-        get(child(ref(database), `pretenderGame/gameInfo/players/`))
-        .then((snapshot) => {
+        get(child(ref(database), `pretenderGame/gameInfo/players/`)).then((snapshot) => {
             if(snapshot.exists()) {
                 const data = snapshot.val()
-                Object.entries(data).map( element => {
-                    usersArray.push(element[1])
-                })                
+
+                set(ref(database, `pretenderGame/gameInfo/usersConnected`), Object.entries(data).length)
+
+                Object.entries(data).map( user => { if(!user[1].pretender) usersArray.push(user[1]) })
+
+                const randomUserFromArray = usersArray[Math.floor(Math.random()*usersArray.length)]
+    
+                set(ref(database, `pretenderGame/gameInfo/players/${randomUserFromArray.playerURL}`), { ...randomUserFromArray, pretender: true, isPretender: true })
+                set(ref(database, `pretenderGame/gameInfo/started`), true)            
+                applicationDispatch({ type: 'set-page', payload: 'preparationPhase' })
+                usersArray = []
             }
-        })
-        .then(() => {            
-            const randomUserFromArray = usersArray[Math.floor(Math.random()*usersArray.length)]
-            set(ref(database, `pretenderGame/gameInfo/players/${randomUserFromArray.playerURL}`), { ...randomUserFromArray, pretender: true })
-            set(ref(database, `pretenderGame/gameInfo/started`), true)
-            set(ref(database, `pretenderGame/gameInfo/usersConnected`), usersArray.length)
-            applicationDispatch({ type: 'set-page', payload: 'preparationPhase' })
-            usersArray = []
-        })      
+        }) 
 
     }
 
@@ -136,6 +189,12 @@ const GameSetupPage = () => {
                     label='Start game'
                     disabled={!(selectedTopic.length !== 0 && gameDuration.length !== 0 && presentationDuration.length !== 0)}
                     onClick={startGame}
+                />
+                <Button
+                    color='red' 
+                    label='Database reset'
+                    margin='25px 0 0 0'
+                    onClick={databaseReset}
                 />
             </ConfigurationSection>
             <TopicsSection>

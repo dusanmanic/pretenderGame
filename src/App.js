@@ -46,7 +46,6 @@ const App = () => {
 
   return (
     <Routes>
-      {console.log('renderuje se')}
       <Route path="/" element={<HomePage />} />
       <Route path="admin-setup-page" element={<Router />} />
       <Route path={`${gameCode}`} element={<ThePretenderPage />} />

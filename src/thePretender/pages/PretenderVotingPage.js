@@ -13,12 +13,14 @@ const PretenderVotingPage = () => {
     const applicationDispatch = useApplicationDispatch()
     const { pretenderUser } = useApplicationStore()
 
+    const [gameInfo, setGameInfo] = useState()
     const [connectedUser, setConnectedUsers] = useState([])
 
     useEffect(() => {
         let usersArray = []
         let usersVotedArray = []
         onValue(ref(database, `pretenderGame/gameInfo/`), snapshot => {
+            setGameInfo(snapshot.val())
             Object.entries(snapshot.val().players).map( x => {
                 usersArray.push(x[1])
                 if(x[1].id === pretenderUser.id) applicationDispatch({ type: 'set-pretender-user', payload: x[1] })
@@ -49,7 +51,7 @@ const PretenderVotingPage = () => {
         <Container>
             <React.Fragment>
                 <Text fontSize='36px' fontWeight='bold'>The Pretender</Text>
-                <Text fontSize='22px'>Round 1 - Discusion</Text>
+                <Text fontSize='22px'>Round {gameInfo?.roundsPlayed} - Discusion</Text>
             </React.Fragment>
             <table style={{ borderCollapse: 'collapse'}}>
                 <PlayersTable>
