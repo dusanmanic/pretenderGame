@@ -78,8 +78,8 @@ const ResultPage = () => {
             },
         }})
 
-        window.location.href='http://localhost:3001/admin-setup-page'
-        // window.location.href='https://ubiquitous-alpaca-9d3e24.netlify.app/admin-setup-page'
+        // window.location.href='http://localhost:3001/admin-setup-page'
+        window.location.href='https://ubiquitous-alpaca-9d3e24.netlify.app/admin-setup-page'
     }
 
     const newRoundHandler = event => {
