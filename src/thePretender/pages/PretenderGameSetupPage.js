@@ -4,11 +4,13 @@ import styled from "styled-components";
 import { database } from "../../api/firebase";
 import { ref, set, child, get } from "firebase/database";
 
+import LOG_IN from '../../assets/audio/LOG_IN.wav'
 import Button from "../../components/fragments/Button";
 
 import { useApplicationDispatch } from '../../store/application/useApplicationStore'
 
 const PretenderGameSetupPage = () => {
+    const loginAudio = new Audio(LOG_IN)
 
     const applicationDispatch = useApplicationDispatch()
 
@@ -61,6 +63,8 @@ const PretenderGameSetupPage = () => {
                 set(ref(database, `pretenderGame/gameInfo/players/player1Info`), pretenderUser)
                 applicationDispatch({ type: 'set-pretender-user', payload: pretenderUser })
                 applicationDispatch({ type: 'set-pretenderPage', payload: 'pretenderGameLoading' })
+
+                loginAudio.play()
             }
         })
     }

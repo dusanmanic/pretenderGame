@@ -48,6 +48,7 @@ const ResultPage = () => {
             roundsPlayed: 1,
             started: false,
             topic: '',
+            selectedWord: '',
             usersConnected: 0,
             newRound: false,
             endGame: true,
@@ -77,8 +78,8 @@ const ResultPage = () => {
             },
         }})
 
-        // window.location.href='http://localhost:3000/admin-setup-page'
-        window.location.href='https://ubiquitous-alpaca-9d3e24.netlify.app/admin-setup-page'
+        window.location.href='http://localhost:3001/admin-setup-page'
+        // window.location.href='https://ubiquitous-alpaca-9d3e24.netlify.app/admin-setup-page'
     }
 
     const newRoundHandler = event => {
@@ -88,9 +89,9 @@ const ResultPage = () => {
         setPopUp(true)
 
         get(child(ref(database), `pretenderGame/gameInfo/players/`)).then((snapshot) => {
-            Object.entries(snapshot.val()).map(user => {
-                if(!user[1].pretender) wasPretender.push(user[1])
-            })
+
+            Object.entries(snapshot.val()).map(user => { if(!user[1].pretender) wasPretender.push(user[1]) })
+
             if(wasPretender.length === 0) {
                 setPopUp(false)
                 window.alert('All users was pretenders!')
@@ -104,6 +105,7 @@ const ResultPage = () => {
                     roundsPlayed: gameInfo.roundsPlayed + 1,
                     started: false,
                     topic: '',
+                    selectedWord: '',
                     newRound: true,
                     endGame: false
                 })
@@ -138,7 +140,7 @@ const ResultPage = () => {
             }
             <TopElement>
                 <TextWrapper>
-                    <Text fontSize='36px' fontWeight='bold'>The Pretender</Text>
+                    <Text fontSize='36px' fontWeight='bold'>Who`s pretending</Text>
                     <Text fontSize='22px'>Round {gameInfo?.roundsPlayed} - Discusion</Text>
                 </TextWrapper>
                 <ButtonWrapper>

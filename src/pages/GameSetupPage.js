@@ -5,7 +5,7 @@ import Select from 'react-select'
 import { v4 as uuidv4 } from 'uuid';
 
 import { database } from "../api/firebase";
-import { ref, set, child, get, onValue } from "firebase/database";
+import { ref, set, child, get, onValue, remove } from "firebase/database";
 
 import { useApplicationStore, useApplicationDispatch } from "../store/application/useApplicationStore";
 
@@ -39,6 +39,22 @@ const GameSetupPage = () => {
         }) 
     }, [])
 
+    useEffect(() => {
+        if(selectedTopic) {
+            get(child(ref(database), `pretenderGame/topics/${selectedTopic}`)).then(snapshot => {
+                if(snapshot.exists()) {
+                    const data = snapshot.val()
+                    const randomNumber = Math.floor(Math.random()*data.length);
+                    const randomWord = data[randomNumber]
+
+                    console.log(randomWord)
+                    set(ref(database, `pretenderGame/gameInfo/selectedWord`), randomWord)
+                    // applicationDispatch({ type: 'set-pretender-word', payload: data[randomNumber] })
+                }
+            })
+        } 
+    }, [selectedTopic])
+
     const selectOnChangeHandler = event => {
         applicationDispatch({ type: 'set-selected-topic', payload: event.value })
         set(ref(database, `pretenderGame/gameInfo/topic`), event.value)
@@ -52,8 +68,8 @@ const GameSetupPage = () => {
     }
 
     const copySessionLink = () => {
-        // navigator.clipboard.writeText(`localhost:3000/${gameCode}`)
-        navigator.clipboard.writeText(`https://ubiquitous-alpaca-9d3e24.netlify.app/${gameCode}`)
+        navigator.clipboard.writeText(`localhost:3001/${gameCode}`)
+        // navigator.clipboard.writeText(`https://ubiquitous-alpaca-9d3e24.netlify.app/${gameCode}`)
     }
 
     const selectRoundDuration = event => {
@@ -79,6 +95,7 @@ const GameSetupPage = () => {
             roundsPlayed: 1,
             started: false,
             topic: '',
+            selectedWord: '',
             usersConnected: 0,
             newRound: false,
             endGame: false,
@@ -108,9 +125,21 @@ const GameSetupPage = () => {
             },
         }})
 
-        // window.location.href='http://localhost:3000/admin-setup-page'
-        window.location.href='https://ubiquitous-alpaca-9d3e24.netlify.app/admin-setup-page'
+        window.location.href='http://localhost:3001/admin-setup-page'
+        // window.location.href='https://ubiquitous-alpaca-9d3e24.netlify.app/admin-setup-page'
         
+    }
+
+    const removeUser = (event) => {
+        event.preventDefault()
+        // console.log(event.target.id)
+
+        get(child(ref(database), `pretenderGame/gameInfo/players/`)).then((snapshot) => {
+            if(snapshot.exists()) {
+                const data = snapshot.val()
+                Object.entries(data).map( user => {if(user[1].name.includes(event.target.id)) { remove(ref(database, `pretenderGame/gameInfo/players/` + user[0])) }})
+            }
+        })
     }
 
     const startGame = () => {
@@ -158,7 +187,7 @@ const GameSetupPage = () => {
                         return (
                             <UserButtonWrapper key={uuidv4()}>
                                 <Text fontSize='22px' >{user}</Text>
-                                <Button color='blue' label='REMOVE' />
+                                <Button onClick={removeUser} id={user} color='blue' label='REMOVE' />
                             </UserButtonWrapper>
                         )
                     })}
@@ -200,7 +229,7 @@ const GameSetupPage = () => {
             <TopicsSection>
                 <Button
                     color='blue'
-                    label='MENAGE TOPIC'
+                    label='MANAGE TOPIC'
                     onClick={() => applicationDispatch({ type: 'set-page', payload: 'menageTopics' })} 
                 />
             </TopicsSection>

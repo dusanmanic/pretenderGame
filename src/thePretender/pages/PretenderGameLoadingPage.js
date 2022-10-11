@@ -6,19 +6,22 @@ import { ref, set, child, get, onValue } from "firebase/database";
 
 import { useApplicationStore, useApplicationDispatch } from '../../store/application/useApplicationStore';
 
+import GAME_LAUNCH from '../../assets/audio/GAME_LAUNCH.wav'
 const PretenderGameLoadingPage = () => {
+    const gameLaunchAudio = new Audio(GAME_LAUNCH)
     const applicationDispatch = useApplicationDispatch()
     const { pretenderUser } = useApplicationStore()
 
     const [loaded, setLoaded] = useState()
 
-    useEffect(() => {       
+    useEffect(() => {
         onValue(ref(database, `pretenderGame/gameInfo/started/`), snapshot => {
             if(!snapshot.val()) {
                 return setLoaded('Please wait for the game to start . . .')
             } else {
                 get(child(ref(database), `pretenderGame/gameInfo/players/${pretenderUser.playerURL}`)).then(snapshot => {
                     if(snapshot.exists()) {
+                        gameLaunchAudio.play()
                         const data = snapshot.val()
                         let countdownNumber = 10
                         const countdown = setInterval(() => {

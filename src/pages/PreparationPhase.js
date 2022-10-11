@@ -94,7 +94,7 @@ const PreparationPhase = () => {
                 <Text display='block' color='blue'>
                     <a style={{cursor: 'pointer'}} onClick={() => applicationDispatch({ type: 'set-page', payload: 'gameSelection' })}>BACK TO GAME LIST</a>
                 </Text>
-                <Text display='block' fontSize='45px' >The Pretender</Text>
+                <Text display='block' fontSize='45px' >Who`s pretending</Text>
             </TitleSection>
             <UserWordWrapper>
                 <Text display='block' fontSize='24px' margin='20px 0 20px 20px'>{numberOfConnectedUser} users connected</Text>
@@ -115,7 +115,7 @@ const PreparationPhase = () => {
                         {connectedUsers.map( user => { return (
                             <PlayersTableTD key={uuidv4()}>
                                 <Text display='block' fontSize='22px'>{user.inputText}</Text>
-                                {user.id === userAnswering.id && !user.finishPresenting && <Text display='block' fontSize='18px'>presenting...</Text>}
+                                {user.id === userAnswering.id && !user.finishPresenting && <Text display='block' fontSize='18px'>thinking...</Text>}
                                 {user.finishPresenting && <Text display='flex' fontSize='18px'>presented <img src={Check} /></Text> }
                             </PlayersTableTD>
                         ) })}

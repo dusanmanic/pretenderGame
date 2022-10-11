@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
+import Button from '../../components/fragments/Button'
 import { v4 as uuidv4 } from 'uuid';
 
-import { database } from '../../api/firebase';  
+import { database } from '../../api/firebase';
 import { ref, set, child, get, onValue } from "firebase/database";
 
-import { useApplicationStore, useApplicationDispatch } from '../../store/application/useApplicationStore';
-
+import { useApplicationStore, useApplicationDispatch } from '../../store/application/useApplicationStore'
 import SandClockPNG from '../../assets/sand-clock.png'
-
-import Button from '../../components/fragments/Button';
 import CreateTopicFields from '../../components/CreateTopicFields'
 
 const PretenderUserPage = () => {
-    const tX30 = ['-391px', '-364px', '-337px', '-310px', '-283px', '-256px', '-229px', '-202px', '-175px', '-148px', '-121px', '-94px', '-67px', '-40px', '-13px', '14px', '41px', '68px', '95px', '122px', '149px', '176px', '203px', '230px', '257px', '284px', '311px', '338px', '365px', '392px']
-    const tX45 = ['-396px', '-378px', '-360px', '-342px', '-324px', '-306px', '-288px', '-270px', '-252px', '-234px', '-216px', '-198px', '-180px', '-162px', '-144px', '-126px', '-108px', '-90px', '-72px', '-54px', '-36px', '-18px', '0px', '18px', '36px', '54px', '72px', '90px', '108px', '126px', '144px', '162px', '180px', '198px', '216px', '234px', '252px', '270px', '288px', '306px', '324px', '342px', '360px', '378px', '396px']
-    
     const applicationDispatch = useApplicationDispatch()
     const { pretenderUser } = useApplicationStore()
 
+    const tX30 = ['-391px', '-364px', '-337px', '-310px', '-283px', '-256px', '-229px', '-202px', '-175px', '-148px', '-121px', '-94px', '-67px', '-40px', '-13px', '14px', '41px', '68px', '95px', '122px', '149px', '176px', '203px', '230px', '257px', '284px', '311px', '338px', '365px', '392px']
+    const tX45 = ['-396px', '-378px', '-360px', '-342px', '-324px', '-306px', '-288px', '-270px', '-252px', '-234px', '-216px', '-198px', '-180px', '-162px', '-144px', '-126px', '-108px', '-90px', '-72px', '-54px', '-36px', '-18px', '0px', '18px', '36px', '54px', '72px', '90px', '108px', '126px', '144px', '162px', '180px', '198px', '216px', '234px', '252px', '270px', '288px', '306px', '324px', '342px', '360px', '378px', '396px']
+    
     const [gameInfo, setGameInfo] = useState()
     const [loader, setLoader] = useState([])
     const [connectedUser, setConnectedUsers] = useState([])
@@ -140,7 +138,7 @@ const PretenderUserPage = () => {
             {!pretenderUser.finishPresenting ?
             <React.Fragment>
                 <React.Fragment>
-                    <Text fontSize='36px' fontWeight='bold'>The Pretender</Text>
+                    <Text fontSize='36px' fontWeight='bold'>Who`s pretending</Text>
                     <Text fontSize='22px'>Round {gameInfo?.roundsPlayed}</Text>
                 </React.Fragment>
                 {!pretenderUser.addedWord && 
@@ -174,7 +172,7 @@ const PretenderUserPage = () => {
                                     {connectedUser.map( user => {
                                         return (
                                         <PlayersTableTD key={uuidv4()}>
-                                            {pretenderUser.id === user.id ? <Text fontSize='22px'>That`s me, I am pretender</Text> : <Text fontSize='22px'>{user.inputText}</Text>}                                        
+                                            {pretenderUser.id === user.id ? <Text fontSize='22px'>That`s me, I am the pretender</Text> : <Text fontSize='22px'>{user.inputText}</Text>}                                        
                                         </PlayersTableTD>
                                         ) })}
                                 </PlayersTableTR>
@@ -193,7 +191,7 @@ const PretenderUserPage = () => {
                                 {!pretenderUser.presenting ? 
                                     <Text fontSize='26px' fontWeight='bold' textAlign='center' padding='25px 0 25px 0' >Wait for your turn{'\n'}to present your contribution</Text>
                                     :
-                                    <Text fontSize='26px' fontWeight='bold' textAlign='center' padding='25px 0 25px 0' >Present your contribution now.{'\n'}Talk about it</Text>
+                                    <Text fontSize='26px' fontWeight='bold' textAlign='center' padding='25px 0 25px 0' >Present your contribution now.{'\n'}Present your word</Text>
                                 }
                                 <BackText>
                                     <Text>{pretenderUser.inputText}</Text>

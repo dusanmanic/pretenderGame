@@ -50,7 +50,7 @@ const PretenderVotingPage = () => {
     return (
         <Container>
             <React.Fragment>
-                <Text fontSize='36px' fontWeight='bold'>The Pretender</Text>
+                <Text fontSize='36px' fontWeight='bold'>Who`s pretending</Text>
                 <Text fontSize='22px'>Round {gameInfo?.roundsPlayed} - Discusion</Text>
             </React.Fragment>
             <table style={{ borderCollapse: 'collapse'}}>

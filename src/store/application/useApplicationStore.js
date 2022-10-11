@@ -18,6 +18,7 @@ const initialState = {
     selectedTopic: '',
     selectedWord: '',
     gameDuration: '',
+    topicDisplayName: '',
     presentationDuration: '',
     game,
     gameCode: null,
@@ -38,6 +39,7 @@ const reducer = (state, action) => {
         case 'set-selected-game': return { ...state, selectedGame: action.payload }
         case 'set-game': return { ...state, game: action.payload }
         case 'set-topic': return { ...state, topic: action.payload }
+        case 'set-topic-display-name': return { ...state, topicDisplayName: action.payload }
         case 'set-selected-topic': return { ...state, selectedTopic: action.payload }
         case 'set-editing-topic': return { ...state, editTopic: action.payload }
         case 'set-game-code': return { ...state, gameCode: action.payload }

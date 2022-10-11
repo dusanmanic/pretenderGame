@@ -54,6 +54,8 @@ const Text = styled.p`
 `
 const StyledImage = styled.img`
     width: 230px;
+    height: 200px; 
+    object-fit: contain;
     margin: 10px 10px 10px 10px
 `
 export default GameCard

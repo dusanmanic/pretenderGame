@@ -1,26 +1,34 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import Button from '../../components/fragments/Button'
+import { v4 as uuidv4 } from 'uuid';
 
 import { database } from '../../api/firebase';
 import { ref, set, child, get, onValue } from "firebase/database";
 
 import { useApplicationStore, useApplicationDispatch } from '../../store/application/useApplicationStore'
 import SandClockPNG from '../../assets/sand-clock.png'
+import CreateTopicFields from '../../components/CreateTopicFields'
+
+import PLAYER_SUBMIT from '../../assets/audio/PLAYER_SUBMIT.wav'
 
 const PretenderPreparationPhase = () => {
-    const applicationDispatch = useApplicationDispatch()
+    const playerSubmitAudio = new Audio(PLAYER_SUBMIT)
 
-    const { pretenderWord, pretenderUser } = useApplicationStore()
-    
+    const applicationDispatch = useApplicationDispatch()
+    const { pretenderUser, selectedWord } = useApplicationStore()
+
     const tX30 = ['-391px', '-364px', '-337px', '-310px', '-283px', '-256px', '-229px', '-202px', '-175px', '-148px', '-121px', '-94px', '-67px', '-40px', '-13px', '14px', '41px', '68px', '95px', '122px', '149px', '176px', '203px', '230px', '257px', '284px', '311px', '338px', '365px', '392px']
     const tX45 = ['-396px', '-378px', '-360px', '-342px', '-324px', '-306px', '-288px', '-270px', '-252px', '-234px', '-216px', '-198px', '-180px', '-162px', '-144px', '-126px', '-108px', '-90px', '-72px', '-54px', '-36px', '-18px', '0px', '18px', '36px', '54px', '72px', '90px', '108px', '126px', '144px', '162px', '180px', '198px', '216px', '234px', '252px', '270px', '288px', '306px', '324px', '342px', '360px', '378px', '396px']
-    
+
     const [gameInfo, setGameInfo] = useState()
     const [loader, setLoader] = useState([])
     const [loaded, setLoaded] = useState(false)
+    const [connectedUser, setConnectedUsers] = useState([])
+    const [selectedTopic, setSelectedTopic] = useState([])
     const [roundDuration, setRoundDuration] = useState(null)
     const [inputField, setInputField] = useState('')
+    const [topicName, setTopicName] = useState('')
 
     let backWidth = Math.round(800/gameInfo?.durationOfRound) * gameInfo?.durationOfRound
     let loadingWidth = Math.round(800/gameInfo?.durationOfRound)
@@ -28,7 +36,29 @@ const PretenderPreparationPhase = () => {
     let loaderArray = []
     let tX = []
 
-    useState(() => {
+    useEffect(() => {
+        get(child(ref(database), `pretenderGame/gameInfo/`)).then(snapshot => {
+            setRoundDuration(snapshot.val().durationOfRound)
+            const topic = snapshot.val().topic
+            get(child(ref(database), `pretenderGame/topics/`)).then(snapshot => {
+                Object.entries(snapshot.val()).map(element => {
+                    if(element[0] === topic) {
+                        setSelectedTopic({ topic: element[1] })
+                    }
+                })
+            })
+        })
+    }, [])
+
+    useEffect(() => {
+        get(child(ref(database), `pretenderGame/gameInfo/selectedWord`)).then(snapshot => {
+        if(snapshot.exists()) {
+            const selectedWord = snapshot.val()
+            applicationDispatch({ type: 'set-pretender-word', payload: selectedWord })
+          }
+    }) }, [gameInfo])
+
+    useEffect(() => { // ????? promenio sam, bilo je useState !!!!
         let usersPresentedArray = []
         onValue(ref(database, `pretenderGame/gameInfo/`), snapshot => {
             setGameInfo(snapshot.val())
@@ -87,10 +117,12 @@ const PretenderPreparationPhase = () => {
 
     const onSubmitHandler = event => {
         event.preventDefault()
-        
+
         if(event.target[0].value.length === 0) {
             window.alert('You need to insert word')
         } else {
+            playerSubmitAudio.play()
+
             applicationDispatch({ type: 'set-pretender-user', payload: {
                 ...pretenderUser, 
                 addedWord: true,
@@ -114,72 +146,68 @@ const PretenderPreparationPhase = () => {
 
     return (
         <Container>
-            {!pretenderUser.finishPresenting ? 
-                <SectionWrapper>
-                    <React.Fragment>
-                        <Text fontSize='36px' fontWeight='bold'>The Pretender</Text>
-                        <Text fontSize='22px'>Round {gameInfo?.roundsPlayed}</Text>
-                    </React.Fragment>
-                    <TimerSection>
-                        {!pretenderUser.addedWord ?
-                            <TimerWrapper backWidth={`${backWidth}px`}>
-                                <Text position='absolute' fontSize='22px' color='white'>{gameInfo?.topic}</Text>
-                                { loader.map( x => {
-                                    return (
-                                        <LoadingColor
-                                            loadingWidth={x.loadingWidth}
-                                            borderStart={x.borderStart}
-                                            borderEnd={x.borderEnd}
-                                            key={x.key}
-                                            tX={x.tX}
-                                        />
-                                    )
-                                })}
-                                <BackgroundColor backWidth={`${backWidth}px`} />
-                            </TimerWrapper>
+            {!pretenderUser.finishPresenting ?
+            <React.Fragment>
+                <React.Fragment>
+                    <Text fontSize='36px' fontWeight='bold'>Who`s pretending</Text>
+                    <Text fontSize='22px'>Round {gameInfo?.roundsPlayed}</Text>
+                </React.Fragment>
+                {!pretenderUser.addedWord && 
+                    <TimerWrapper backWidth={`${backWidth}px`}>
+                    <Text position='absolute' fontSize='22px' color='white'>{selectedWord}</Text>
+                    {loader.map( x => {
+                        return (
+                            <LoadingColor
+                                loadingWidth={x.loadingWidth}
+                                borderStart={x.borderStart}
+                                borderEnd={x.borderEnd}
+                                key={x.key}
+                                tX={x.tX}
+                            />
+                        )
+                    })}
+                    <BackgroundColor backWidth={`${backWidth}px`} />
+                </TimerWrapper> }
+                {(selectedTopic.length !== 0 && !pretenderUser.addedWord) && <CreateTopicFields disabled defaultValue={selectedTopic} widthCalc='calc(10px + 40vw)' inputWidth='10vw' />}
+                {pretenderUser.addedWord &&                    
+                    <SandClockWrapper>
+                        {!pretenderUser.presenting ?
+                            <SandClock src={SandClockPNG} />
                             :
-                            <SandClockWrapper>
-                                {!pretenderUser.presenting ?
-                                    <SandClock src={SandClockPNG} />
-                                    :
-                                    <Text fontSize='56px' fontWeight='bold' color='blue'>YOUR{'\n'}TURN</Text>
-                                }
-                                {!pretenderUser.presenting ? 
-                                    <Text fontSize='26px' fontWeight='bold' textAlign='center' padding='25px 0 25px 0' >Wait for your turn{'\n'}to present your contribution</Text>
-                                    :
-                                    <Text fontSize='26px' fontWeight='bold' textAlign='center' padding='25px 0 25px 0' >Present your contribution now.{'\n'}Talk about it</Text>
-                                }
-                                <BackText>
-                                    <Text>{pretenderUser.inputText}</Text>
-                                </BackText>
-                            </SandClockWrapper>
+                            <Text fontSize='56px' fontWeight='bold' color='blue'>YOUR{'\n'}TURN</Text>
                         }
-                    </TimerSection>
-                    {!pretenderUser.addedWord &&
-                        <FormWrapper onSubmit={onSubmitHandler}>
-                            <Text display='flex' fontSize='21px'>Enter a matching word or phrase <Text color={inputField.length === 20 ? 'red' : 'black'}>(max 20 characters)</Text>:</Text>
-                            <StyledInput
-                                type={'text'}
-                                placeholder='Add word'
-                                onChange={charactersLength}
-                                maxLength='20'
-                            />
-                            <Button
-                                disabled={pretenderUser.addedWord}
-                                type='submit'
-                                color='blue'
-                                label='Submit'
-                            />
-                        </FormWrapper>
-                    }
-                </SectionWrapper>
-                :
-                <WelcomeMessage>
-                    <Text fontSize='56px' fontWeight='bold' color='blue'>THANK YOU</Text>
-                    <Text display='block' fontSize='21px'>Please wait for other players{'\n'}to finish presenting...</Text>
-                </WelcomeMessage>
-            }
-            
+                        {!pretenderUser.presenting ? 
+                            <Text fontSize='26px' fontWeight='bold' textAlign='center' padding='25px 0 25px 0' >Wait for your turn{'\n'}to present your contribution</Text>
+                            :
+                            <Text fontSize='26px' fontWeight='bold' textAlign='center' padding='25px 0 25px 0' >Present your contribution now.{'\n'}Present your word</Text>
+                        }
+                        <BackText>
+                            <Text>{pretenderUser.inputText}</Text>
+                        </BackText>
+                    </SandClockWrapper>
+                }
+                {!pretenderUser.addedWord && 
+                    <FormWrapper onSubmit={onSubmitHandler}>
+                    <Text display='flex' fontSize='21px'>Enter a matching word or phrase <Text color={inputField.length === 20 ? 'red' : 'black'}>(max 20 characters)</Text>:</Text>
+                    <StyledInput
+                        type={'text'}
+                        placeholder='Add word'
+                        onChange={charactersLength}
+                        maxLength='20'
+                    />
+                    <Button
+                        disabled={pretenderUser.addedWord}
+                        type='submit'
+                        color='blue'
+                        label='Submit'
+                    />
+                </FormWrapper>}
+            </React.Fragment>
+            :
+            <WelcomeMessage>
+                <Text fontSize='56px' fontWeight='bold' color='blue'>THANK YOU</Text>
+                <Text display='block' fontSize='21px'>Please wait for other players{'\n'}to finish presenting...</Text>
+            </WelcomeMessage>}
         </Container>
     )
 }
@@ -188,41 +216,21 @@ const Container = styled.div`
     width: 100vw;
     height: 100vh;
     display: flex;
-    justify-content: center;
-    align-items: center;
-`
-const SectionWrapper = styled.section`
-    width: 80vw;
-    height: 80vh;
-`
-const TimerSection = styled.section`
-    display: flex;
-    justify-content: center;
-`
-const TimerWrapper = styled.div`
-    width: ${props => props.backWidth && props.backWidth};
-    height: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid gray;
-    border-radius: 8px;
-    margin: 50px 0 50px 0;
-`
-const FormWrapper = styled.form`
-    height: 140px;
-    display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+`
+const SectionWrapper = styled.div`
+    width: 85vw;
+    display: flex;
+    justify-content: center;
     justify-content: space-between;
     align-items: center;
 `
-const StyledInput = styled.input`
-    width: 500px;
-    height: 40px;
-    padding-left: 10px;
-    border: 1px solid gray;
-    border-radius: 5px
-`
+const LeftSection = styled.section``
+
+const RightSection = styled.section``
+
 const Text = styled.span`
     display: ${props => props.display ? props.display : 'block'};
     position: ${props => props.position && props.position};
@@ -236,6 +244,24 @@ const Text = styled.span`
     margin: ${props => props.margin};
     white-space: pre-wrap;    
     padding: ${props => props.padding && props.padding}
+`
+const PlayersTable = styled.tbody`
+    width: 40vw;
+    display: flex;
+    border: 1px solid black;
+`
+const PlayersTableTR = styled.tr`
+    width: 20vw;
+    display: flex;
+    flex-direction: column;
+`
+const PlayersTableTD = styled.td`
+    height: 55px;
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px 0 25px; 
 `
 const LoadingColor = styled.div`
     width: ${props => props.loadingWidth && props.loadingWidth};
@@ -251,6 +277,16 @@ const BackgroundColor = styled.div`
     height: 50px;
     border-radius: 8px;
     background-color: gray;    
+`
+const TimerWrapper = styled.div`
+    width: ${props => props.backWidth && props.backWidth};
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid gray;
+    border-radius: 8px;
+    margin: 50px 0 50px 0;
 `
 const SandClockWrapper = styled.div`
     display: flex;
@@ -270,6 +306,21 @@ const BackText = styled.div`
     align-items: center;
     font-size: 30px;
     font-weight: bold;
+`
+const FormWrapper = styled.form`
+    height: 140px;
+    margin: 45px 0 0 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+`
+const StyledInput = styled.input`
+    width: 500px;
+    height: 40px;
+    padding-left: 10px;
+    border: 1px solid gray;
+    border-radius: 5px
 `
 const WelcomeMessage = styled.div`    
     display: flex;
