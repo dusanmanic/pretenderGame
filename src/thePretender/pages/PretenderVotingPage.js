@@ -50,7 +50,7 @@ const PretenderVotingPage = () => {
     return (
         <Container>
             <React.Fragment>
-                <Text fontSize='36px' fontWeight='bold'>Who`s pretending</Text>
+                <Text fontSize='36px' fontWeight='bold'>Who's pretending</Text>
                 <Text fontSize='22px'>Round {gameInfo?.roundsPlayed} - Discusion</Text>
             </React.Fragment>
             <table style={{ borderCollapse: 'collapse'}}>
@@ -69,7 +69,7 @@ const PretenderVotingPage = () => {
                                 <Text fontSize='22px'>{user.inputText}</Text>
                                 <RightSide>
                                     {user.id === pretenderUser.id ? 
-                                        <Text>That`s me</Text>
+                                        <Text>That's me</Text>
                                         :
                                         <StyledImg disabled={pretenderUser.voted} data-id={user.id} src={ImgBtn} onClick={voteHandler} />
                                     }                                    

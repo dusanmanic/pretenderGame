@@ -10,7 +10,13 @@ import { useApplicationStore, useApplicationDispatch } from '../../store/applica
 import SandClockPNG from '../../assets/sand-clock.png'
 import CreateTopicFields from '../../components/CreateTopicFields'
 
+import PLAYER_SUBMIT from '../../assets/audio/PLAYER_SUBMIT.wav'
+import TICKING_FOR_WAITING from '../../assets/audio/TICKING_FOR_WAITING.wav'
+
 const PretenderUserPage = () => {
+    const playerSubmitAudio = new Audio(PLAYER_SUBMIT)
+    const tickingForWaitingAudio = new Audio(TICKING_FOR_WAITING)
+
     const applicationDispatch = useApplicationDispatch()
     const { pretenderUser } = useApplicationStore()
 
@@ -43,6 +49,18 @@ const PretenderUserPage = () => {
             })
         })
     }, [])
+
+    useEffect(() => {
+        if(pretenderUser.addedWord && !pretenderUser.presenting && !pretenderUser.finishPresenting) { 
+            tickingForWaitingAudio.play()
+            console.log('1')
+         }
+         if(pretenderUser.addedWord && pretenderUser.presenting) {
+            tickingForWaitingAudio.pause()
+            tickingForWaitingAudio.currentTime = 0
+            console.log('2')
+         }
+    }, [pretenderUser.addedWord, pretenderUser.presenting, pretenderUser.finishPresenting])
 
     useEffect(() => {
         if(roundDuration === 0) {
@@ -117,6 +135,8 @@ const PretenderUserPage = () => {
         if(event.target[0].value.length === 0) {
             window.alert('You need to insert word')
         } else {
+            playerSubmitAudio.play()
+
             applicationDispatch({ type: 'set-pretender-user', payload: {
                 ...pretenderUser, 
                 voted: true,
@@ -138,7 +158,7 @@ const PretenderUserPage = () => {
             {!pretenderUser.finishPresenting ?
             <React.Fragment>
                 <React.Fragment>
-                    <Text fontSize='36px' fontWeight='bold'>Who`s pretending</Text>
+                    <Text fontSize='36px' fontWeight='bold'>Who's pretending</Text>
                     <Text fontSize='22px'>Round {gameInfo?.roundsPlayed}</Text>
                 </React.Fragment>
                 {!pretenderUser.addedWord && 
@@ -172,7 +192,7 @@ const PretenderUserPage = () => {
                                     {connectedUser.map( user => {
                                         return (
                                         <PlayersTableTD key={uuidv4()}>
-                                            {pretenderUser.id === user.id ? <Text fontSize='22px'>That`s me, I am the pretender</Text> : <Text fontSize='22px'>{user.inputText}</Text>}                                        
+                                            {pretenderUser.id === user.id ? <Text fontSize='18px'>That's me, I am the pretender</Text> : <Text fontSize='22px'>{user.inputText}</Text>}                                        
                                         </PlayersTableTD>
                                         ) })}
                                 </PlayersTableTR>

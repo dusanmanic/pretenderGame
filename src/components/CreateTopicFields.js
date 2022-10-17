@@ -35,7 +35,7 @@ const CreateTopicFieldsWrapper = styled.div`
 const StyledInput = styled.input`
     width: ${props => props.inputWidth};
     height: 10vh;
-    font-size: 24px;
+    font-size: 18px;
     padding: 0;
     text-align: center;
     border: 1px solid gray;

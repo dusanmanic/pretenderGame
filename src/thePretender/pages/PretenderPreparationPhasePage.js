@@ -11,9 +11,11 @@ import SandClockPNG from '../../assets/sand-clock.png'
 import CreateTopicFields from '../../components/CreateTopicFields'
 
 import PLAYER_SUBMIT from '../../assets/audio/PLAYER_SUBMIT.wav'
+import TICKING_FOR_WAITING from '../../assets/audio/TICKING_FOR_WAITING.wav'
 
 const PretenderPreparationPhase = () => {
     const playerSubmitAudio = new Audio(PLAYER_SUBMIT)
+    const tickingForWaitingAudio = new Audio(TICKING_FOR_WAITING)
 
     const applicationDispatch = useApplicationDispatch()
     const { pretenderUser, selectedWord } = useApplicationStore()
@@ -24,6 +26,7 @@ const PretenderPreparationPhase = () => {
     const [gameInfo, setGameInfo] = useState()
     const [loader, setLoader] = useState([])
     const [loaded, setLoaded] = useState(false)
+    const [tickingForWaiting, setTickingForWaiting] = useState(false)
     const [connectedUser, setConnectedUsers] = useState([])
     const [selectedTopic, setSelectedTopic] = useState([])
     const [roundDuration, setRoundDuration] = useState(null)
@@ -49,6 +52,18 @@ const PretenderPreparationPhase = () => {
             })
         })
     }, [])
+
+    useEffect(() => {
+        if(pretenderUser.addedWord && !pretenderUser.presenting && !pretenderUser.finishPresenting) { 
+            tickingForWaitingAudio.play()
+            console.log('1')
+         }
+         if(pretenderUser.addedWord && pretenderUser.presenting) {
+            tickingForWaitingAudio.pause()
+            tickingForWaitingAudio.currentTime = 0
+            console.log('2')
+         }
+    }, [pretenderUser.addedWord, pretenderUser.presenting, pretenderUser.finishPresenting])
 
     useEffect(() => {
         get(child(ref(database), `pretenderGame/gameInfo/selectedWord`)).then(snapshot => {
@@ -129,6 +144,7 @@ const PretenderPreparationPhase = () => {
                 inputText: event.target[0].value
             }})
             get(child(ref(database), `pretenderGame/gameInfo/players/`)).then( snapshot => {
+                setTickingForWaiting(true)
                 Object.entries(snapshot.val()).map( x => {
                     if(x[1].id === pretenderUser.id) {
                         set(ref(database, `pretenderGame/gameInfo/players/${x[0]}/inputText`), event.target[0].value)
@@ -149,7 +165,7 @@ const PretenderPreparationPhase = () => {
             {!pretenderUser.finishPresenting ?
             <React.Fragment>
                 <React.Fragment>
-                    <Text fontSize='36px' fontWeight='bold'>Who`s pretending</Text>
+                    <Text fontSize='36px' fontWeight='bold'>Who's pretending</Text>
                     <Text fontSize='22px'>Round {gameInfo?.roundsPlayed}</Text>
                 </React.Fragment>
                 {!pretenderUser.addedWord && 

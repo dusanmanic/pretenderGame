@@ -16,6 +16,7 @@ const PretenderGameSetupPage = () => {
 
     const setPretender = event => {
         event.preventDefault()
+        loginAudio.play()
 
         get(child(ref(database), `pretenderGame/gameInfo/players/`)).then((snapshot) => {
             if(snapshot.exists()) {
@@ -64,7 +65,6 @@ const PretenderGameSetupPage = () => {
                 applicationDispatch({ type: 'set-pretender-user', payload: pretenderUser })
                 applicationDispatch({ type: 'set-pretenderPage', payload: 'pretenderGameLoading' })
 
-                loginAudio.play()
             }
         })
     }

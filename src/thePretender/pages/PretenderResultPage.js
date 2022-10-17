@@ -17,8 +17,8 @@ const PretenderResultPage = () => {
     useEffect(() => {
         let usersArray = []
         onValue(ref(database, `pretenderGame/gameInfo/`), snapshot => {
-            if(snapshot.val().endGame) window.location.href='https://ubiquitous-alpaca-9d3e24.netlify.app/'
-            // if(snapshot.val().endGame) window.location.href='http://localhost:3001/'
+            // if(snapshot.val().endGame) window.location.href='https://ubiquitous-alpaca-9d3e24.netlify.app/'
+            if(snapshot.val().endGame) window.location.href='http://localhost:3001/'
 
             setGameInfo(snapshot.val())
             if(snapshot.val().newRound) applicationDispatch({ type: 'set-pretenderPage', payload: 'pretenderGameLoading' })
@@ -37,7 +37,7 @@ const PretenderResultPage = () => {
     return (
         <Container>
             <React.Fragment>
-                <Text fontSize='36px' fontWeight='bold'>Who`s pretending</Text>
+                <Text fontSize='36px' fontWeight='bold'>Who's pretending</Text>
                 <Text fontSize='22px'>Round {gameInfo?.roundsPlayed} - Discusion</Text>
             </React.Fragment>
             <TopicName>
